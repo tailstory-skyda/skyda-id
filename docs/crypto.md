@@ -8,8 +8,9 @@ The goal is modern algorithms only, preferring FIPS-approved ones wherever we ch
 | Passwords | None | Sign-in is passkeys, Google/GitHub/Microsoft, or an emailed code |
 | Email codes | 8 digits, 10 minutes, 5 attempts, stored as HMAC-SHA-256 | Keyed with `BETTER_AUTH_SECRET` so a database copy can't be brute-forced |
 | Session cookies | `__Host-` prefix, Secure, HttpOnly, SameSite=Lax, host-only | Other `*.skyda.dev` hosts can't set or shadow them |
+| Tokens for site apps | ES256 (ECDSA P-256, SHA-256) JWTs, 15 minutes, published as a JWKS | Signing keys rotate every 90 days |
 | Passkeys | User verification and discoverable credentials required; RP ID `skyda.dev` | Accepts EdDSA, ES256 and RS256 public keys. RS256 stays because Windows Hello creates RS256 credentials, and dropping it would lock those users out |
 
 ## Known gaps
 
-- Better Auth encrypts stored social-login tokens with XChaCha20-Poly1305. It's a modern AEAD but not FIPS-approved, and the library has no option to swap it for AES-GCM.
+- Better Auth encrypts stored social-login tokens and the token signing private keys with XChaCha20-Poly1305. It's a modern AEAD but not FIPS-approved, and the library has no option to swap it for AES-GCM.
