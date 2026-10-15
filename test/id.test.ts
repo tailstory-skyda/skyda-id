@@ -55,29 +55,12 @@ async function signIn(email: string) {
 
 describe("security headers", () => {
   it("are set on every response", async () => {
-    const response = await request("/healthz");
+    const response = await request("/api/auth/ok");
     expect(response.status).toBe(200);
     expect(response.headers.get("strict-transport-security")).toContain("max-age=63072000");
     expect(response.headers.get("x-content-type-options")).toBe("nosniff");
     expect(response.headers.get("content-security-policy")).toContain("default-src 'none'");
     expect(response.headers.get("cache-control")).toBe("no-store");
-  });
-});
-
-describe("signing keys", () => {
-  it("publishes P-256 signing keys", async () => {
-    // A key is minted on first use; signing in issues a session JWT key.
-    await signIn("jwks@example.com");
-    const response = await request("/api/auth/jwks");
-    expect(response.status).toBe(200);
-    const { keys } = (await response.json()) as { keys: Record<string, string>[] };
-    expect(keys.length).toBeGreaterThan(0);
-    for (const key of keys) {
-      expect(key.kty).toBe("EC");
-      expect(key.crv).toBe("P-256");
-      expect(key.alg).toBe("ES256");
-      expect(key.d).toBeUndefined();
-    }
   });
 });
 
@@ -90,7 +73,7 @@ describe("sign-in", () => {
     expect(response.status).not.toBe(200);
   });
 
-  it("creates the account and a personal workspace from an email code", async () => {
+  it("creates the account from an email code", async () => {
     const response = await signIn("new@example.com");
     expect(response.status).toBe(200);
 
@@ -106,16 +89,6 @@ describe("sign-in", () => {
     });
     const body = (await me.json()) as { user: { email: string } } | null;
     expect(body?.user.email).toBe("new@example.com");
-
-    const workspace = await env.DB.prepare(
-      `SELECT w.personal, m.role FROM workspace w
-       JOIN member m ON m.organizationId = w.id
-       JOIN user u ON u.id = m.userId
-       WHERE u.email = ?`,
-    )
-      .bind("new@example.com")
-      .first<{ personal: number; role: string }>();
-    expect(workspace).toEqual({ personal: 1, role: "owner" });
   });
 
   it("does not store email codes in readable form", async () => {

@@ -4,7 +4,7 @@ export interface Env {
   EMAIL: SendEmail;
   /** Public origin of this Worker, e.g. https://id.skyda.dev */
   BASE_URL: string;
-  /** Signs sessions and encrypts the JWT private keys at rest. */
+  /** Signs sessions, keys the email-code hashes and encrypts stored social-login tokens. */
   BETTER_AUTH_SECRET: string;
   TURNSTILE_SECRET_KEY?: string;
   GOOGLE_CLIENT_ID?: string;

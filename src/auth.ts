@@ -1,5 +1,5 @@
 import { betterAuth, type BetterAuthOptions } from "better-auth";
-import { captcha, emailOTP, jwt, organization } from "better-auth/plugins";
+import { captcha, emailOTP } from "better-auth/plugins";
 import { passkey } from "@better-auth/passkey";
 import { hmacSha256 } from "./crypto";
 import type { Env } from "./env";
@@ -27,11 +27,11 @@ function socialProviders(env: Env): BetterAuthOptions["socialProviders"] {
 }
 
 export function createAuth(env: Env) {
-  const issuer = env.BASE_URL;
+  const baseURL = env.BASE_URL;
 
   return betterAuth({
     appName: "Skyda",
-    baseURL: issuer,
+    baseURL,
     secret: env.BETTER_AUTH_SECRET,
     database: env.DB,
     telemetry: { enabled: false },
@@ -50,7 +50,7 @@ export function createAuth(env: Env) {
       defaultCookieAttributes: { secure: true, httpOnly: true, sameSite: "lax", path: "/" },
       ipAddress: { ipAddressHeaders: ["cf-connecting-ip"] },
     },
-    trustedOrigins: [issuer],
+    trustedOrigins: [baseURL],
     rateLimit: {
       enabled: true,
       storage: "database",
@@ -62,50 +62,11 @@ export function createAuth(env: Env) {
         "/passkey/*": { window: 60, max: 20 },
       },
     },
-    databaseHooks: {
-      user: {
-        create: {
-          // Every account owns a personal workspace from the start, so all
-          // data hangs off a workspace id even before shared ones exist.
-          after: async (user, ctx) => {
-            if (!ctx) throw new Error("Personal workspace needs an endpoint context");
-            const adapter = ctx.context.adapter;
-            const workspace = await adapter.create<{ id: string }>({
-              model: "organization",
-              data: {
-                name: "Personal",
-                slug: `personal-${user.id}`,
-                personal: true,
-                createdAt: new Date(),
-              },
-            });
-            await adapter.create({
-              model: "member",
-              data: {
-                organizationId: workspace.id,
-                userId: user.id,
-                role: "owner",
-                createdAt: new Date(),
-              },
-            });
-          },
-        },
-      },
-    },
     plugins: [
-      jwt({
-        // ES256 (ECDSA P-256 + SHA-256): FIPS 186-5 approved and verifiable by
-        // every JOSE library. Nothing else is provisioned.
-        jwks: {
-          keyPairConfig: { alg: "ES256" },
-          rotationInterval: 60 * 60 * 24 * 90,
-        },
-        jwt: { issuer },
-      }),
       passkey({
-        rpID: new URL(issuer).hostname.replace(/^id\./, ""),
+        rpID: new URL(baseURL).hostname.replace(/^id\./, ""),
         rpName: "Skyda",
-        origin: issuer,
+        origin: baseURL,
         authenticatorSelection: {
           residentKey: "required",
           userVerification: "required",
@@ -134,20 +95,6 @@ export function createAuth(env: Env) {
             }),
           ]
         : []),
-      organization({
-        // Shared workspaces come later; for now only the personal one exists.
-        allowUserToCreateOrganization: false,
-        schema: {
-          organization: {
-            modelName: "workspace",
-            additionalFields: {
-              personal: { type: "boolean", required: true, defaultValue: false, input: false },
-            },
-          },
-        },
-      }),
     ],
   });
 }
-
-export type Auth = ReturnType<typeof createAuth>;
