@@ -1,2 +1,25 @@
 # skyda-id
-Our auth backend
+
+Skyda's identity service at `id.skyda.dev`: accounts and sign-in. A Cloudflare Worker on D1, built on Better Auth.
+
+## Develop
+
+```sh
+npm ci
+npm run migrate:local
+echo 'BETTER_AUTH_SECRET=<32+ random bytes>' > .dev.vars
+echo 'BASE_URL=http://localhost:8787' >> .dev.vars
+npm run dev
+```
+
+Locally, `wrangler dev` writes sign-in emails to files instead of sending them and logs where.
+
+## Schema changes
+
+Change the auth config, then `npm run -s schema > migrations/NNNN_name.sql` writes only what's missing on top of the existing migrations.
+
+## Deploy
+
+Create the D1 database (`wrangler d1 create skyda-id`), put its id in `wrangler.jsonc`, turn on Cloudflare Email Service sending for skyda.dev, set `BETTER_AUTH_SECRET` with `wrangler secret put` (the optional ones are listed in `wrangler.jsonc`), then `npm run migrate:remote` and `npm run deploy`.
+
+Cryptography choices are in [docs/crypto.md](docs/crypto.md).

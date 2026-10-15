@@ -1,0 +1,22 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "skyda-id",
+  "main": "src/index.ts",
+  "compatibility_date": "2026-10-01",
+  "compatibility_flags": ["nodejs_compat"],
+  "routes": [{ "pattern": "id.skyda.dev", "custom_domain": true }],
+  "workers_dev": false,
+  "observability": { "enabled": true },
+  "vars": { "BASE_URL": "https://id.skyda.dev" },
+  "d1_databases": [
+    {
+      "binding": "DB",
+      "database_name": "skyda-id",
+      "database_id": "95e14c7e-3598-485e-bdc0-14ae509d9bac",
+      "migrations_dir": "migrations"
+    }
+  ],
+  "send_email": [{ "name": "EMAIL", "allowed_sender_addresses": ["no-reply@skyda.dev"] }]
+  // Secrets (wrangler secret put): BETTER_AUTH_SECRET is required. Optional:
+  // TURNSTILE_SECRET_KEY, and GOOGLE_/GITHUB_/MICROSOFT_ CLIENT_ID + CLIENT_SECRET pairs.
+}
