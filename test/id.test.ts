@@ -1,10 +1,20 @@
 import { env } from "cloudflare:test";
-import { afterEach, describe, expect, it, vi } from "vitest";
+import { describe, expect, it } from "vitest";
 import app from "../src/index";
 
 const BASE = "http://localhost";
 
 let nextIp = 1;
+const sent: { to: string; subject: string; text?: string }[] = [];
+const testEnv = {
+  ...env,
+  EMAIL: {
+    send: async (message: { to: string; subject: string; text?: string }) => {
+      sent.push(message);
+      return { messageId: `test-${sent.length}` };
+    },
+  } as unknown as SendEmail,
+};
 
 /** Each test call comes from its own address unless one is given, so rate limits don't leak between tests. */
 function request(path: string, init?: RequestInit, ip = `198.51.100.${nextIp++}`) {
@@ -14,10 +24,9 @@ function request(path: string, init?: RequestInit, ip = `198.51.100.${nextIp++}`
     headers.set("content-type", "application/json");
     headers.set("origin", BASE);
   }
-  return app.fetch(new Request(`${BASE}${path}`, { ...init, headers }), env);
+  return app.fetch(new Request(`${BASE}${path}`, { ...init, headers }), testEnv);
 }
 
-/** Sends an email code and returns it by catching the dev-mode email log. */
 function requestCode(email: string, ip?: string) {
   return request(
     "/api/auth/email-otp/send-verification-otp",
@@ -26,12 +35,12 @@ function requestCode(email: string, ip?: string) {
   );
 }
 
+/** Sends an email code and returns it from the captured email. */
 async function sendCode(email: string): Promise<string> {
-  const log = vi.spyOn(console, "log").mockImplementation(() => {});
   const response = await requestCode(email);
   expect(response.status).toBe(200);
-  const line = log.mock.calls.map((call) => String(call[0])).find((text) => text.includes(email));
-  const code = line?.match(/code is (\d+)/)?.[1];
+  const message = sent.findLast((m) => m.to === email);
+  const code = message?.text?.match(/code is (\d+)/)?.[1];
   expect(code).toBeDefined();
   return code!;
 }
@@ -43,10 +52,6 @@ async function signIn(email: string) {
     body: JSON.stringify({ email, otp }),
   });
 }
-
-afterEach(() => {
-  vi.restoreAllMocks();
-});
 
 describe("security headers", () => {
   it("are set on every response", async () => {
@@ -142,7 +147,6 @@ describe("sign-in", () => {
   });
 
   it("limits how often one address can request codes", async () => {
-    vi.spyOn(console, "log").mockImplementation(() => {});
     const ip = "203.0.113.7";
     const statuses = [];
     for (let i = 0; i < 4; i++) statuses.push((await requestCode(`limit${i}@example.com`, ip)).status);

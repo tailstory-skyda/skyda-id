@@ -15,7 +15,8 @@
       "database_id": "00000000-0000-0000-0000-000000000000",
       "migrations_dir": "migrations"
     }
-  ]
-  // Secrets (wrangler secret put): BETTER_AUTH_SECRET, TURNSTILE_SECRET_KEY,
-  // RESEND_API_KEY, and the GOOGLE_/GITHUB_/MICROSOFT_ CLIENT_ID + CLIENT_SECRET pairs.
+  ],
+  "send_email": [{ "name": "EMAIL", "allowed_sender_addresses": ["no-reply@skyda.dev"] }]
+  // Secrets (wrangler secret put): BETTER_AUTH_SECRET is required. Optional:
+  // TURNSTILE_SECRET_KEY, and GOOGLE_/GITHUB_/MICROSOFT_ CLIENT_ID + CLIENT_SECRET pairs.
 }

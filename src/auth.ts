@@ -3,7 +3,6 @@ import { captcha, emailOTP, jwt, organization } from "better-auth/plugins";
 import { oauthProvider } from "@better-auth/oauth-provider";
 import { passkey } from "@better-auth/passkey";
 import { hmacSha256 } from "./crypto";
-import { sendEmail } from "./email";
 import type { Env } from "./env";
 
 /** Namespaced claim carrying the workspace a token acts in. */
@@ -132,7 +131,8 @@ export function createAuth(env: Env) {
         allowedAttempts: 5,
         storeOTP: { hash: (otp) => hmacSha256(env.BETTER_AUTH_SECRET, otp) },
         sendVerificationOTP: async ({ email, otp }) => {
-          await sendEmail(env, {
+          await env.EMAIL.send({
+            from: { name: "Skyda", email: "no-reply@skyda.dev" },
             to: email,
             subject: `${otp} is your Skyda code`,
             text: `Your Skyda sign-in code is ${otp}. It expires in 10 minutes.\n\nIf you didn't ask for this, you can ignore this email.`,
