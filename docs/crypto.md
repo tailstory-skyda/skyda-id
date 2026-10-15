@@ -5,11 +5,9 @@ The goal is modern algorithms only, preferring FIPS-approved ones wherever we ch
 | What | Choice | Notes |
 |---|---|---|
 | TLS | 1.3 minimum | Set at the Cloudflare zone |
-| Token signing (ID and access tokens, JWKS) | ES256 (ECDSA P-256, SHA-256) only | No RS256, no HS256 keys provisioned. Keys rotate every 90 days |
-| OAuth | Authorization code + PKCE S256 only | No implicit or password grants, no `plain` PKCE. Dynamic client registration is off |
+| Token signing (JWKS) | ES256 (ECDSA P-256, SHA-256) only | No RS256, no HS256 keys provisioned. Keys rotate every 90 days |
 | Passwords | None | Sign-in is passkeys, Google/GitHub/Microsoft, or an emailed code |
 | Email codes | 8 digits, 10 minutes, 5 attempts, stored as HMAC-SHA-256 | Keyed with `BETTER_AUTH_SECRET` so a database copy can't be brute-forced |
-| OAuth client secrets, refresh and access tokens | Stored hashed (SHA-256) | |
 | Session cookies | `__Host-` prefix, Secure, HttpOnly, SameSite=Lax, host-only | Other `*.skyda.dev` hosts can't set or shadow them |
 | Passkeys | User verification and discoverable credentials required; RP ID `skyda.dev` | Accepts EdDSA, ES256 and RS256 public keys. RS256 stays because Windows Hello creates RS256 credentials, and dropping it would lock those users out |
 

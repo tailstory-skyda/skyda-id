@@ -1,6 +1,6 @@
 # skyda-id
 
-Skyda's identity service at `id.skyda.dev`: accounts, sign-in, personal workspaces and the OAuth/OIDC issuer every Skyda app trusts. A Cloudflare Worker on D1, built on Better Auth.
+Skyda's identity service at `id.skyda.dev`: accounts, sign-in and personal workspaces. A Cloudflare Worker on D1, built on Better Auth.
 
 ## Develop
 

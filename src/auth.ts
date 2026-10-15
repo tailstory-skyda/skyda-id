@@ -1,12 +1,8 @@
 import { betterAuth, type BetterAuthOptions } from "better-auth";
 import { captcha, emailOTP, jwt, organization } from "better-auth/plugins";
-import { oauthProvider } from "@better-auth/oauth-provider";
 import { passkey } from "@better-auth/passkey";
 import { hmacSha256 } from "./crypto";
 import type { Env } from "./env";
-
-/** Namespaced claim carrying the workspace a token acts in. */
-export const WORKSPACE_CLAIM = "https://skyda.dev/workspace";
 
 const SESSION_LIFETIME = 60 * 60 * 24 * 30;
 
@@ -28,16 +24,6 @@ function socialProviders(env: Env): BetterAuthOptions["socialProviders"] {
         }
       : {}),
   };
-}
-
-async function personalWorkspaceId(env: Env, userId: string): Promise<string | null> {
-  const row = await env.DB.prepare(
-    `SELECT w.id FROM workspace w JOIN member m ON m.organizationId = w.id
-     WHERE m.userId = ? AND w.personal = 1 LIMIT 1`,
-  )
-    .bind(userId)
-    .first<{ id: string }>();
-  return row?.id ?? null;
 }
 
 export function createAuth(env: Env) {
@@ -158,20 +144,6 @@ export function createAuth(env: Env) {
               personal: { type: "boolean", required: true, defaultValue: false, input: false },
             },
           },
-        },
-      }),
-      oauthProvider({
-        loginPage: "/sign-in",
-        consentPage: "/consent",
-        allowDynamicClientRegistration: false,
-        accessTokenExpiresIn: 60 * 10,
-        refreshTokenExpiresIn: SESSION_LIFETIME,
-        storeClientSecret: "hashed",
-        storeTokens: "hashed",
-        customAccessTokenClaims: async ({ user }) => {
-          if (!user) return {};
-          const workspace = await personalWorkspaceId(env, user.id);
-          return workspace ? { [WORKSPACE_CLAIM]: workspace } : {};
         },
       }),
     ],

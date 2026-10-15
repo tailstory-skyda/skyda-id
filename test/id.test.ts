@@ -64,19 +64,7 @@ describe("security headers", () => {
   });
 });
 
-describe("discovery", () => {
-  it("advertises only modern algorithms and flows", async () => {
-    const response = await request("/.well-known/openid-configuration");
-    expect(response.status).toBe(200);
-    const config = (await response.json()) as Record<string, unknown>;
-    expect(config.issuer).toBe(BASE);
-    expect(config.id_token_signing_alg_values_supported).toEqual(["ES256"]);
-    expect(config.code_challenge_methods_supported).toEqual(["S256"]);
-    expect(config.response_types_supported).not.toContain("token");
-    expect(config.grant_types_supported).not.toContain("password");
-    expect(config.grant_types_supported).not.toContain("implicit");
-  });
-
+describe("signing keys", () => {
   it("publishes P-256 signing keys", async () => {
     // A key is minted on first use; signing in issues a session JWT key.
     await signIn("jwks@example.com");

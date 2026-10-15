@@ -12,7 +12,6 @@
     "migrate:remote": "wrangler d1 migrations apply skyda-id --remote"
   },
   "dependencies": {
-    "@better-auth/oauth-provider": "^1.7.8",
     "@better-auth/passkey": "^1.7.8",
     "better-auth": "^1.7.8",
     "hono": "^4.13.13"
