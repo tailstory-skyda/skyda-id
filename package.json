@@ -3,13 +3,14 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "dev": "wrangler dev",
+    "dev": "wrangler dev --port 8787 --local-upstream localhost:8787",
     "deploy": "wrangler deploy",
-    "typecheck": "tsc --noEmit",
+    "typecheck": "tsc --noEmit && tsc --noEmit -p client",
     "test": "vitest run",
     "schema": "tsx scripts/schema.ts",
     "migrate:local": "wrangler d1 migrations apply skyda-id --local",
-    "migrate:remote": "wrangler d1 migrations apply skyda-id --remote"
+    "migrate:remote": "wrangler d1 migrations apply skyda-id --remote",
+    "build": "esbuild client/sign-in.ts --bundle --format=esm --minify --target=es2022 --outfile=public/sign-in.js"
   },
   "dependencies": {
     "@better-auth/passkey": "^1.7.8",
@@ -19,6 +20,8 @@
   "devDependencies": {
     "@cloudflare/vitest-plugin": "^1.4.2",
     "@cloudflare/workers-types": "^5.20261015.1",
+    "esbuild": "^0.28.2",
+    "jose": "^6.2.12",
     "tsx": "^4.23.15",
     "typescript": "^6.0.3",
     "vitest": "^4.1.11",

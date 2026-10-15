@@ -7,7 +7,10 @@
   "routes": [{ "pattern": "id.skyda.dev", "custom_domain": true }],
   "workers_dev": false,
   "observability": { "enabled": true },
+  "build": { "command": "npm run build" },
+  "assets": { "directory": "public" },
   "vars": { "BASE_URL": "https://id.skyda.dev" },
+  // Optional var TURNSTILE_SITE_KEY (public) turns Turnstile on together with the secret below.
   "d1_databases": [
     {
       "binding": "DB",
