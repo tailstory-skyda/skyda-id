@@ -12,7 +12,7 @@
     {
       "binding": "DB",
       "database_name": "skyda-id",
-      "database_id": "00000000-0000-0000-0000-000000000000",
+      "database_id": "95e14c7e-3598-485e-bdc0-14ae509d9bac",
       "migrations_dir": "migrations"
     }
   ],
