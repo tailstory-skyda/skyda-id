@@ -23,7 +23,7 @@
     "esbuild": "^0.28.2",
     "jose": "^6.2.17",
     "tsx": "^4.23.15",
-    "typescript": "^6.0.3",
+    "typescript": "^7.0.2",
     "vitest": "^5.1.0",
     "wrangler": "^4.161.0"
   },
