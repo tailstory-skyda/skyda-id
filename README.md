@@ -33,3 +33,7 @@ Change the auth config, then `npm run -s schema > migrations/NNNN_name.sql` writ
 Create the D1 database (`wrangler d1 create skyda-id`), put its id in `wrangler.jsonc`, turn on Cloudflare Email Service sending for skyda.dev, set `BETTER_AUTH_SECRET` with `wrangler secret put` (the optional ones are listed in `wrangler.jsonc`), then `npm run migrate:remote` and `npm run deploy`.
 
 Cryptography choices are in [docs/crypto.md](docs/crypto.md).
+
+## License
+
+Copyright 2026 Tailstory. [Apache 2.0](LICENSE).
